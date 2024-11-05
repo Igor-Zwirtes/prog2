@@ -72,7 +72,7 @@ G.set_vertex_value(6, -7)
 
 # Questão 1
 def bfs(graph: Graph, vertex):
-    queue = [vertex] # Utiliza uma fila para o que nós sejam visitados na ordem em que foram encontrados, garantindo que a busca seja em largura
+    queue = [vertex] # Utiliza uma fila para que os nós sejam visitados na ordem em que foram encontrados, garantindo que a busca seja em largura
     path = [vertex] # Lista ordenada dos nós visitados
     while queue:
         for edge in graph.neighbors(queue[0]):
@@ -86,7 +86,8 @@ def bfs(graph: Graph, vertex):
 
 # Questão 2
 def property_search(graph: Graph, vertex, value):
-    # vertex = graph._vertices[0]
+    # Considera que o primeiro vértice a ser visitado será passado à função, como na função original
+    # vertex = graph._vertices[0] # Caso o vértice não deva ser passado pela função
     queue = [vertex]
     path = [vertex]
     while queue:
@@ -248,5 +249,5 @@ def lake(matrix):
 
     return has_lake
 
-print(lake(m))
-print(lake(n))
+# print(lake(m))
+# print(lake(n))
