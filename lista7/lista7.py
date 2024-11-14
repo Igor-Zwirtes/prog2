@@ -21,79 +21,45 @@ def find_judge(n, trust):
     return -1
 
 # Questão 2
-import math
+'''
+b) Para mostrar que o problema da Minimum Spanning Tree é  Ω(nlog⁡(n)), podemos fazer uma redução de ordenação à MST, e com isso teremos um limite inferior não trivial.
+Para isso, considere que temos n números reais que queremos ordenar, e criamos um grafo no plano 2D com n vértices, onde cada vértice tem coordenadas (xi,0) correspondendo ao i-ésimo número real xi​ da lista. Após isso, é contruído um grafo completo onde cada vértice é um dos pontos (xi​,0) e a aresta entre dois vértices (xi​,0) e (xj​,0) tem um peso igual a ∣xi​−xj​∣, que é a distância entre os pontos na reta dos números reais. Uma Minimum-Spanning Tree neste grafo conecta todos os vértices de forma que a soma dos pesos das arestas é minimizada. A MST desse grafo corresponde a uma forma de conectar os números que respeita a ordem de seus valores (já que a árvore geradora mínima com pesos baseados em ∣xi​−xj​∣ conecta os pontos em ordem crescente dos números para minimizar o peso total). A ordem dos vértices na MST pode ser usada para obter a ordenação dos números originais.
+Portanto, a redução do problema de ordenação de números reais para o problema de calcular uma MST mostra que calcular a MST tem uma complexidade de tempo  de pelo menos Ω(nlog(n)).
 
-# Classe que representa uma aresta
-class Edge:
-    def __init__(self, u, v, weight):
-        self.u = u
-        self.v = v
-        self.weight = weight
+c) O algoritmo implementado tem complexidade O(n²), pois a cada iteração, é necessário percorrer todos os vértices e atualizar todas as distâncias, portanto, o algoritmo não é ótimo, já que há algoritmos que conseguem resolver esse problema em O(nlog(n)), como o algoritmo de Kruskal, e portanto, o problema da MST é θ(nlog(n)), sendo essa uma cota ótima.
+'''
 
-    def __lt__(self, other):
-        return self.weight < other.weight
+# a)
+def minimum_spanning_tree(points):
+    n = len(points)
+    in_mst = [False] * n  # Marca quais vértices já estão na MST
+    min_edge = [float('inf')] * n  # Salva as menores distâncias conhecidas
+    min_edge[0] = 0  # Começa no primeiro vértice
+    parent = [-1] * n  # Para reconstruir a MST
 
+    for _ in range(n):
+        # Encontra o vértice com a menor aresta para adicionar à MST
+        u = -1
+        for i in range(n):
+            if not in_mst[i] and (u == -1 or min_edge[i] < min_edge[u]):
+                u = i
 
-# Função para encontrar o pai de um nó no Union-Find
-def find(parent, i):
-    if parent[i] == i:
-        return i
-    return find(parent, parent[i])
+        in_mst[u] = True
 
-# Função para unir dois subconjuntos no Union-Find
-def union(parent, rank, x, y):
-    xroot = find(parent, x)
-    yroot = find(parent, y)
+        # Atualiza as menores distâncias conhecidas e os pais dos vértices adjacentes
+        for v in range(n):
+            if not in_mst[v]:
+                dist = euclidean_distance(points[u], points[v])
+                if dist < min_edge[v]:
+                    min_edge[v] = dist
+                    parent[v] = u
 
-    if rank[xroot] < rank[yroot]:
-        parent[xroot] = yroot
-    elif rank[xroot] > rank[yroot]:
-        parent[yroot] = xroot
-    else:
-        parent[yroot] = xroot
-        rank[xroot] += 1
+    # Retorna as arestas da MST como pares (u, v) utilizando os índices da lista points
+    mst_edges = [(parent[i], i) for i in range(1, n) if parent[i] != -1]
+    return mst_edges
 
-# Função para calcular a distância euclidiana entre dois pontos
 def euclidean_distance(p1, p2):
-    return math.sqrt((p1[0] - p2[0])**2 + (p1[1] - p2[1])**2)
-
-# Função principal para encontrar a Minimum Spanning Tree
-def kruskal_mst(points):
-    edges = []
-    num_points = len(points)
-
-    # Construindo a lista de arestas
-    for i in range(num_points):
-        for j in range(i + 1, num_points):
-            weight = euclidean_distance(points[i], points[j])
-            edges.append(Edge(i, j, weight))
-
-    # Ordenando as arestas pelo peso
-    edges.sort()
-
-    # Inicializando estruturas para o Union-Find
-    parent = []
-    rank = []
-
-    for node in range(num_points):
-        parent.append(node)
-        rank.append(0)
-
-    mst = []
-
-    # Adicionando arestas à MST usando o algoritmo de Kruskal
-    for edge in edges:
-        u = find(parent, edge.u)
-        v = find(parent, edge.v)
-
-        if u != v:  # Se não forma um ciclo
-            mst.append(edge)
-            union(parent, rank, u, v)
-
-            if len(mst) == num_points - 1:
-                break
-
-    return mst
+    return ((p1[0] - p2[0])**2 + (p1[1] - p2[1])**2)**0.5
 
 # Questão 3
 '''
@@ -236,7 +202,8 @@ def grid_search(f: RealFunction, domain: Interval = None, grid_freq = 8) -> Inte
     idx = np.argmax(VI)
     return Interval(L1[idx], L1[idx+1])
 
-def newton_root(f: RealFunction, x0: float = 0.0, iterations: int = 100, erroTol: float = 1e-6, domain: Interval = None):
+# Função para o método de Newton-Raphson
+def newton_root(f: RealFunction, x0: float = 0.0, iterations: int = 100, erroTol: float = 1e-6):
     x = x0
     for _ in range(iterations):
         fx = f(x)
@@ -327,12 +294,13 @@ def error_pol(f, P, intv, n = 1000):
     vectError = np.abs(f(x)-P(x))
     return np.sum(vectError)/n, np.max(vectError)
 
+# Construtor do polinômio de Lagrange
 class LagrangeInterpolator(interpolater):
     def __init__(self, x, y):
         if len(x) != len(y):
             raise RuntimeError(f"Dimensions must be equal len(x) = {len(x)} != len(y) = {len(y)}")
         self.data = [x, y]
-        self.poly = lagrange(x, y)
+        self.poly = lagrange(x, y) # Utiliza a função do Scipy para gerar o polinômio
 
     def evaluate(self, X):
         return self.poly(X)
