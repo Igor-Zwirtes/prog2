@@ -1,6 +1,7 @@
 import numpy as np
 import random
 import matplotlib.pyplot as plt
+from scipy import stats
 from scipy.optimize import minimize
 
 # Questão 1
@@ -23,6 +24,14 @@ class PolinomialAproximation:
     def __call__(self, x):
         return self.eval_poly(x)
 
+
+'''
+p = [(-1,0), (1,0), (0,-1)]
+teste = PolinomialAproximation(2)
+teste.polinomial_aproximation(p)
+print(teste.coeficients)
+# 1*x^2 - 1
+'''
 
 # Questão 2
 '''
@@ -48,9 +57,9 @@ def find_degree(points):
         RST = sum((y - y_mean) ** 2 for _, y in points)
         RSS = sum((y_actual - y_pred) ** 2 for _, y_actual, y_pred in results)
         
-        eps = 1 - RSS / RST # Calcula o R^2
+        eps = 1 - (RSS / RST) # Calcula o R^2
 
-        if eps-eps_max<0.001 and eps_max != 0: # Verifica se o aumento do R^2 foi significativo
+        if eps-eps_max < 0.001 and eps_max != 0: # Verifica se o aumento do R^2 foi significativo
             return (D, eps)
         
         if eps > eps_max:
@@ -74,6 +83,8 @@ def data_gen(n, d):
     return data, coef[::-1] # Retorna os coeficientes no mesmo modelo da questão 1
 
 # Função que faz o conjunto de testes solicitados
+'''O teste consiste em gerar polinômios com coeficientes aleatórios, de grau 1 até n, e um pequeno ruído, para verificar como a função se comporta para diferentes graus e o quão bem os pontos são aproximados.
+'''
 def testes(n=20):
     for i in range(1, n+1): # Valores de d que serão testados
         points, coef = data_gen(75, i) # Gera pontos e o os coeficientes do polinômio original
@@ -89,7 +100,7 @@ def testes(n=20):
 '''
 Os testes mostram que embora o d costume ser um valor menor do que i para i maior que 6, o valor de R^2 quase sempre é superior a 0.8, e sendo geralmente superior a 0.99, o que indica que embora o grau encontrado seja menor do que o do polinômio original, a aproximação é suficientemente boa, exceto para retas, o que se deve pela proximidade entre o RSS e o RST, já que ambos serão retas.
 '''
-testes()
+# testes()
 
 # Questão 3
 # Função para usar o minimize
@@ -125,7 +136,7 @@ def test():
         results.append((a,b))
     return results
 
-print(test())
+# print(test())
 
 # (c)
 # Utilizei o mesmo código visto em aula
@@ -185,7 +196,7 @@ epslon = stats.norm(0, delta).rvs(X.shape)
 Y = (a*X + b) + epslon
 m0 = np.mean(Y)
 
-lin = linear_aproximation(X, Y)
+lin = abs_aproximation(X, Y)
 sqr = square_aproximation(X, Y)
 data_visualization(X, Y, lin, sqr)
 '''
